@@ -1,6 +1,6 @@
 # Modern C++ Learning Project
 
-This repository serves as a learning project for exploring modern C++ concepts and practices.
+This repository serves as a learning project for exploring modern C++ concepts and practices using CMake and C++23.
 
 ## Cloning the Project
 
