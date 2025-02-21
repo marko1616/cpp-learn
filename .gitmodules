@@ -1,0 +1,15 @@
+[submodule "libs/cxxopts"]
+	path = libs/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
+[submodule "libs/PcapPlusPlus"]
+	path = libs/PcapPlusPlus
+	url = https://github.com/seladb/PcapPlusPlus.git
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json.git
+[submodule "assets/ip-location-db"]
+	path = assets/ip-location-db
+	url = https://github.com/sapics/ip-location-db.git
+[submodule "libs/libmaxminddb"]
+	path = libs/libmaxminddb
+	url = https://github.com/maxmind/libmaxminddb.git
