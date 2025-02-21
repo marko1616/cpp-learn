@@ -1,14 +1,13 @@
-#include <filesystem>
-#include <string>
-
 #ifdef _WIN32
 #include <windows.h>
 #elif __APPLE__
 #include <mach-o/dyld.h>
 #elif __linux__
-#include <unistd.h>
 #include <limits.h>
+#include <unistd.h>
 #endif
+
+#include "utils.hpp"
 
 namespace fs = std::filesystem;
 
@@ -16,7 +15,7 @@ namespace wireana {
 namespace utils {
 fs::path get_executable_path() {
 #ifdef _WIN32
-    wchar_t path[MAX_PATH] = { 0 };
+    wchar_t path[MAX_PATH] = {0};
     GetModuleFileNameW(NULL, path, MAX_PATH);
     return fs::path(path);
 #elif __APPLE__
@@ -34,5 +33,5 @@ fs::path get_executable_path() {
 #endif
     return {};
 }
-}
-}
+}  // namespace utils
+}  // namespace wireana
