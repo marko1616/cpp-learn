@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+#include "spdlog/spdlog.h"
 #include "EthLayer.h"
 #include "IPv4Layer.h"
 #include "IPv6Layer.h"
@@ -22,17 +23,18 @@ std::string timespecToUtcString(const timespec& ts) {
     using namespace std::chrono;
 
     const auto tp =
-        system_clock::from_time_t(ts.tv_sec) + nanoseconds(ts.tv_nsec);
+        system_clock::from_time_t(ts.tv_sec);
     const auto time_zone_utc = locate_zone("UTC");
     const auto zt = zoned_time(time_zone_utc, tp);
-    return std::format("{:%Y-%m-%d %H%M%S}", zt);
+    return std::format("{:%Y-%m-%d %H%M%S}.{}", zt, ts.tv_nsec/1000.);
 }
 
 int main(int argc, char* argv[], char* envp[]) {
-    auto executable_dir = wireana::utils::get_executable_path().parent_path();
+    fs::path executable_dir = wireana::utils::get_executable_path().parent_path();
+    spdlog::info("Wireana at:{}", executable_dir.string());
     cxxopts::Options options("Wireana",
                              "A learning project for network analysis");
-    options.add_options()("h,help", "Show help")("v,version", "Show version")(
+    options.add_options()("version", "Show version")("h,help", "Show help")(
         "i,input", "Input file", cxxopts::value<std::string>());
     auto args = options.parse(argc, argv);
     if (args.count("help")) {
@@ -46,46 +48,37 @@ int main(int argc, char* argv[], char* envp[]) {
     }
 
     if (args.count("input") != 1) {
-        std::cerr << "Input file is required and only required one\n";
+        spdlog::critical("Input file is required and only required one");
         return -1;
     }
 
     fs::path pcap_file_path(args["input"].as<std::string>());
     if (!fs::exists(pcap_file_path)) {
-        std::cerr << std::format("Input file {} does not exist\n",
-                                 pcap_file_path.string());
+        spdlog::critical("Input file {} does not exist",
+                         pcap_file_path.string());
         return -1;
     }
 
     if (fs::is_directory(pcap_file_path)) {
-        std::cerr << std::format("Input file {} is a directory\n",
-                                 pcap_file_path.string());
+        spdlog::critical("Input file {} is a directory",
+                         pcap_file_path.string());
         return -1;
     }
 
     std::unique_ptr<pcpp::IFileReaderDevice> reader(
         pcpp::IFileReaderDevice::getReader(pcap_file_path.string()));
     if (reader == nullptr) {
-        std::cerr << "Cannot determine reader for file type\n";
+        spdlog::critical("Cannot determine reader for file type");
         return -1;
     }
 
     if (!reader->open()) {
-        std::cerr << std::format("Cannot open file {}\n",
-                                 pcap_file_path.string());
+        spdlog::critical("Cannot open file {}", pcap_file_path.string());
         return -1;
     }
 
     pcpp::RawPacket raw_packet;
     uint64_t count = 0;
-    auto geolite2db_city_ipv4 = wireana::mmdb::Geolite2CityDB(
-        executable_dir / "assets" / "geolite2-city-ipv4.mmdb");
-    auto geolite2db_city_ipv6 = wireana::mmdb::Geolite2CityDB(
-        executable_dir / "assets" / "geolite2-city-ipv6.mmdb");
-    auto geolite2db_asn_ipv4 = wireana::mmdb::Geolite2ASNDB(
-        executable_dir / "assets" / "geolite2-asn-ipv4.mmdb");
-    auto geolite2db_asn_ipv6 = wireana::mmdb::Geolite2ASNDB(
-        executable_dir / "assets" / "geolite2-asn-ipv6.mmdb");
     using json = nlohmann::json;
     while (reader->getNextPacket(raw_packet)) {
         json packet_info;
@@ -120,13 +113,13 @@ int main(int argc, char* argv[], char* envp[]) {
                     ip_src = ip_layer->getSrcIPAddress();
                     ip_dst = ip_layer->getDstIPAddress();
                     auto asn_src =
-                        geolite2db_asn_ipv4.lookup_asn(ip_src.toString());
+                        wireana::mmdb::geolite2db_asn_ipv4.lookup_asn(ip_src.toString());
                     auto asn_dst =
-                        geolite2db_asn_ipv4.lookup_asn(ip_dst.toString());
+                        wireana::mmdb::geolite2db_asn_ipv4.lookup_asn(ip_dst.toString());
                     auto geo_src =
-                        geolite2db_city_ipv4.lookup_city(ip_src.toString());
+                        wireana::mmdb::geolite2db_city_ipv4.lookup_city(ip_src.toString());
                     auto geo_dst =
-                        geolite2db_city_ipv4.lookup_city(ip_dst.toString());
+                        wireana::mmdb::geolite2db_city_ipv4.lookup_city(ip_dst.toString());
 
                     packet_info["src_ip"] = ip_src.toString();
                     packet_info["src_location"] =
@@ -148,13 +141,13 @@ int main(int argc, char* argv[], char* envp[]) {
                     ip_src = ip_layer->getSrcIPAddress();
                     ip_dst = ip_layer->getDstIPAddress();
                     auto asn_src =
-                        geolite2db_asn_ipv6.lookup_asn(ip_src.toString());
+                        wireana::mmdb::geolite2db_asn_ipv6.lookup_asn(ip_src.toString());
                     auto asn_dst =
-                        geolite2db_asn_ipv6.lookup_asn(ip_dst.toString());
+                        wireana::mmdb::geolite2db_asn_ipv6.lookup_asn(ip_dst.toString());
                     auto geo_src =
-                        geolite2db_city_ipv6.lookup_city(ip_src.toString());
+                        wireana::mmdb::geolite2db_city_ipv6.lookup_city(ip_src.toString());
                     auto geo_dst =
-                        geolite2db_city_ipv6.lookup_city(ip_dst.toString());
+                        wireana::mmdb::geolite2db_city_ipv6.lookup_city(ip_dst.toString());
 
                     packet_info["src_ip"] = ip_src.toString();
                     packet_info["src_location"] =
@@ -183,8 +176,8 @@ int main(int argc, char* argv[], char* envp[]) {
                 }
             }
         }
-        std::cout << packet_info.dump(4) << std::endl;
         count++;
     }
+    spdlog::info("{} packets processed", count);
     return 0;
 }

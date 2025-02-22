@@ -2,8 +2,19 @@
 
 namespace wireana {
 namespace mmdb {
+fs::path executable_dir = wireana::utils::get_executable_path().parent_path();
+
+Geolite2CityDB geolite2db_city_ipv4 = Geolite2CityDB(
+    executable_dir / "assets" / "geolite2-city-ipv4.mmdb");
+Geolite2CityDB geolite2db_city_ipv6 = Geolite2CityDB(
+    executable_dir / "assets" / "geolite2-city-ipv6.mmdb");
+Geolite2ASNDB geolite2db_asn_ipv4 = Geolite2ASNDB(
+    executable_dir / "assets" / "geolite2-asn-ipv4.mmdb");
+Geolite2ASNDB geolite2db_asn_ipv6 = Geolite2ASNDB(
+    executable_dir / "assets" / "geolite2-asn-ipv6.mmdb");
+
 MMDB::MMDB(fs::path path) {
-    std::cout << path;
+    spdlog::info("Loading MMDB: {}", path.string());
     int status = MMDB_open(path.string().data(), MMDB_MODE_MMAP, &mmdb);
     if (status != MMDB_SUCCESS) {
         throw std::runtime_error(std::string(MMDB_strerror(status)));
@@ -16,7 +27,11 @@ std::optional<MMDB_entry_data_list_s*> MMDB::lookup_entry(
     MMDB_lookup_result_s result =
         MMDB_lookup_string(&mmdb, ip.data(), &gai_error, &mmdb_error);
     if (gai_error) {
+#ifdef _WIN32
         throw std::runtime_error(gai_strerrorA(gai_error));
+#else
+        throw std::runtime_error(gai_strerror(gai_error));
+#endif
     }
     if (mmdb_error != MMDB_SUCCESS) {
         throw std::runtime_error(MMDB_strerror(mmdb_error));

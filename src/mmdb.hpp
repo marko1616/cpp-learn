@@ -2,12 +2,13 @@
 #define WIREANA_MMDB_HPP
 
 #include <filesystem>
-#include <iostream>
 #include <optional>
 #include <stdexcept>
 #include <string>
 
+#include "spdlog/spdlog.h"
 #include "maxminddb.h"
+#include "utils.hpp"
 
 namespace fs = std::filesystem;
 
@@ -52,6 +53,10 @@ class Geolite2ASNDB : public MMDB {
     std::optional<Geolite2ASNData> lookup_asn(const std::string& ip);
 };
 
+extern Geolite2CityDB geolite2db_city_ipv4;
+extern Geolite2CityDB geolite2db_city_ipv6;
+extern Geolite2ASNDB geolite2db_asn_ipv4;
+extern Geolite2ASNDB geolite2db_asn_ipv6;
 }  // namespace mmdb
 }  // namespace wireana
 

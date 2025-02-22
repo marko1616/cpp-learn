@@ -13,3 +13,6 @@
 [submodule "libs/libmaxminddb"]
 	path = libs/libmaxminddb
 	url = https://github.com/maxmind/libmaxminddb.git
+[submodule "libs/spdlog"]
+	path = libs/spdlog
+	url = https://github.com/gabime/spdlog

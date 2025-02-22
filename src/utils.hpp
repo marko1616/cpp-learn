@@ -2,7 +2,6 @@
 #define WIREANA_UTILS_HPP
 
 #include <filesystem>
-#include <string>
 
 namespace fs = std::filesystem;
 

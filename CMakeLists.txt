@@ -26,10 +26,12 @@ file(GLOB_RECURSE SOURCES
 
 # Libraries
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/cxxopts)
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/spdlog)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/json)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/libmaxminddb)
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/PcapPlusPlus)
 include_directories(${CMAKE_SOURCE_DIR}/libs/cxxopts)
+include_directories(${CMAKE_SOURCE_DIR}/libs/spdlog/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/json/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/libmaxminddb/include)
 include_directories(${CMAKE_SOURCE_DIR}/libs/PcapPlusPlus/Common++/header)
