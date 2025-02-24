@@ -17,6 +17,8 @@
 #include "mmdb.hpp"
 #include "packet.hpp"
 #include "utils.hpp"
+#include "PcapLiveDeviceList.h"
+#include "PcapLiveDevice.h"
 
 namespace fs = std::filesystem;
 std::string timespecToUtcString(const timespec& ts) {
@@ -26,7 +28,7 @@ std::string timespecToUtcString(const timespec& ts) {
         system_clock::from_time_t(ts.tv_sec);
     const auto time_zone_utc = locate_zone("UTC");
     const auto zt = zoned_time(time_zone_utc, tp);
-    return std::format("{:%Y-%m-%d %H%M%S}.{}", zt, ts.tv_nsec/1000.);
+    return std::format("{:%Y-%m-%d %H%M%S}.{}", zt, ts.tv_nsec/1000.f);
 }
 
 int main(int argc, char* argv[], char* envp[]) {
@@ -77,6 +79,17 @@ int main(int argc, char* argv[], char* envp[]) {
         return -1;
     }
 
+    uint64_t iface_index = 0;
+    auto& pIfaceDeviceList = pcpp::PcapLiveDeviceList::getInstance();
+    for (auto& iface : pIfaceDeviceList.getPcapLiveDevicesList()) {
+#ifdef _WIN32
+        spdlog::info("Iface: {} Name: {} Display name: {}", iface_index, iface->getName(), wireana::utils::get_iface_display_name(iface));
+#else
+        spdlog::info("Iface: {} Name: {}", iface_index, wireana::utils::get_iface_display_name(iface));
+#endif
+        iface_index++;
+    }
+
     pcpp::RawPacket raw_packet;
     uint64_t count = 0;
     using json = nlohmann::json;
@@ -84,8 +97,8 @@ int main(int argc, char* argv[], char* envp[]) {
         json packet_info;
 
         wireana::packet::Packet parsedPacket(&raw_packet);
-        pcpp::MacAddress ethSrc;
-        pcpp::MacAddress ethDst;
+        pcpp::MacAddress eth_src;
+        pcpp::MacAddress eth_dst;
         pcpp::IPAddress ip_src;
         pcpp::IPAddress ip_dst;
         uint16_t srcPort;
@@ -103,8 +116,8 @@ int main(int argc, char* argv[], char* envp[]) {
             switch (curLayer->getProtocol()) {
                 case pcpp::Ethernet: {
                     auto etherLayer = dynamic_cast<pcpp::EthLayer*>(curLayer);
-                    ethSrc = etherLayer->getSourceMac();
-                    ethDst = etherLayer->getDestMac();
+                    eth_src = etherLayer->getSourceMac();
+                    eth_dst = etherLayer->getDestMac();
                     eth_found = true;
                     break;
                 }
