@@ -11,8 +11,11 @@ namespace packet {
 
 class Packet : public pcpp::Packet {
    private:
-    std::optional<wireana::mmdb::Geolite2CityData> geolite2CityData = std::nullopt;
-    std::optional<wireana::mmdb::Geolite2ASNData> geolite2ASNData = std::nullopt;
+    std::optional<wireana::mmdb::Geolite2CityData> geolite2CityData =
+        std::nullopt;
+    std::optional<wireana::mmdb::Geolite2ASNData> geolite2ASNData =
+        std::nullopt;
+
    public:
     explicit Packet(pcpp::RawPacket* rawPacket);
     std::string getInfo();

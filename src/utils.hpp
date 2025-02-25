@@ -3,8 +3,8 @@
 
 #include <filesystem>
 
-#include "spdlog/spdlog.h"
 #include "PcapLiveDevice.h"
+#include "spdlog/spdlog.h"
 
 // After pcap++ to prevent windows.h from being included before winsock2
 #ifdef _WIN32
@@ -15,7 +15,6 @@
 #include <limits.h>
 #include <unistd.h>
 #endif
-
 
 namespace fs = std::filesystem;
 

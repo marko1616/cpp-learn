@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include <string>
 
-#include "spdlog/spdlog.h"
 #include "maxminddb.h"
+#include "spdlog/spdlog.h"
 #include "utils.hpp"
 
 namespace fs = std::filesystem;

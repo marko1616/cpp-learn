@@ -4,14 +4,14 @@ namespace wireana {
 namespace mmdb {
 fs::path executable_dir = wireana::utils::get_executable_path().parent_path();
 
-Geolite2CityDB geolite2db_city_ipv4 = Geolite2CityDB(
-    executable_dir / "assets" / "geolite2-city-ipv4.mmdb");
-Geolite2CityDB geolite2db_city_ipv6 = Geolite2CityDB(
-    executable_dir / "assets" / "geolite2-city-ipv6.mmdb");
-Geolite2ASNDB geolite2db_asn_ipv4 = Geolite2ASNDB(
-    executable_dir / "assets" / "geolite2-asn-ipv4.mmdb");
-Geolite2ASNDB geolite2db_asn_ipv6 = Geolite2ASNDB(
-    executable_dir / "assets" / "geolite2-asn-ipv6.mmdb");
+Geolite2CityDB geolite2db_city_ipv4 =
+    Geolite2CityDB(executable_dir / "assets" / "geolite2-city-ipv4.mmdb");
+Geolite2CityDB geolite2db_city_ipv6 =
+    Geolite2CityDB(executable_dir / "assets" / "geolite2-city-ipv6.mmdb");
+Geolite2ASNDB geolite2db_asn_ipv4 =
+    Geolite2ASNDB(executable_dir / "assets" / "geolite2-asn-ipv4.mmdb");
+Geolite2ASNDB geolite2db_asn_ipv6 =
+    Geolite2ASNDB(executable_dir / "assets" / "geolite2-asn-ipv6.mmdb");
 
 MMDB::MMDB(fs::path path) {
     spdlog::info("Loading MMDB: {}", path.string());
@@ -61,6 +61,7 @@ std::optional<Geolite2CityData> Geolite2CityDB::lookup_city(
         return std::nullopt;
     }
     MMDB_entry_data_list_s* entry_data_list_ptr = entry_data_list.value();
+    MMDB_entry_data_list_s* entry_data_list_header_ptr = entry_data_list_ptr;
     uint16_t num_item = entry_data_list_ptr->entry_data.data_size;
     entry_data_list_ptr = entry_data_list_ptr->next;
     for (int i = 0; i < num_item; i++) {
@@ -100,7 +101,7 @@ std::optional<Geolite2CityData> Geolite2CityDB::lookup_city(
         }
         entry_data_list_ptr = entry_data_list_ptr->next;
     }
-    MMDB_free_entry_data_list(entry_data_list_ptr);
+    MMDB_free_entry_data_list(entry_data_list_header_ptr);
     return std::make_optional(result);
 }
 
@@ -113,6 +114,7 @@ std::optional<Geolite2ASNData> Geolite2ASNDB::lookup_asn(
         return std::nullopt;
     }
     MMDB_entry_data_list_s* entry_data_list_ptr = entry_data_list.value();
+    MMDB_entry_data_list_s* entry_data_list_header_ptr = entry_data_list_ptr;
     uint16_t num_item = entry_data_list_ptr->entry_data.data_size;
     entry_data_list_ptr = entry_data_list_ptr->next;
     for (int i = 0; i < num_item; i++) {
@@ -135,7 +137,7 @@ std::optional<Geolite2ASNData> Geolite2ASNDB::lookup_asn(
         }
         entry_data_list_ptr = entry_data_list_ptr->next;
     }
-    MMDB_free_entry_data_list(entry_data_list_ptr);
+    MMDB_free_entry_data_list(entry_data_list_header_ptr);
     return std::make_optional(result);
 }
 

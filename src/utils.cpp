@@ -5,9 +5,10 @@ namespace fs = std::filesystem;
 namespace wireana {
 namespace utils {
 #ifdef _WIN32
-std::string extract_identifier(const std::string& devicePath) {
+std::string extract_identifier(const std::string &devicePath) {
     std::string pathLower = devicePath;
-    std::transform(pathLower.begin(), pathLower.end(), pathLower.begin(), ::tolower);
+    std::transform(pathLower.begin(), pathLower.end(), pathLower.begin(),
+                   ::tolower);
     if (pathLower.find("npf_loopback") != std::string::npos) {
         return "Loopback";
     }
@@ -44,7 +45,9 @@ fs::path get_executable_path() {
 std::string get_iface_display_name(pcpp::PcapLiveDevice *const &iface) {
 #ifdef _WIN32
     auto identifier = extract_identifier(iface->getName());
-    const std::string base_path = "SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}";
+    const std::string base_path =
+        "SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-"
+        "08002BE10318}";
     const std::string connection_subkey = "\\Connection";
     if (identifier == "Loopback") {
         return "Loopback";
@@ -53,7 +56,8 @@ std::string get_iface_display_name(pcpp::PcapLiveDevice *const &iface) {
     HKEY hKey;
     std::string fullPath = base_path + "\\" + identifier + connection_subkey;
 
-    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, fullPath.c_str(), 0, KEY_READ, &hKey) != ERROR_SUCCESS) {
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, fullPath.c_str(), 0, KEY_READ,
+                      &hKey) != ERROR_SUCCESS) {
         spdlog::warn("Failed to open registry key: {}", fullPath);
         return "";
     }
@@ -62,7 +66,8 @@ std::string get_iface_display_name(pcpp::PcapLiveDevice *const &iface) {
     DWORD buffer_size = sizeof(name_buffer);
     DWORD type;
 
-    if (RegQueryValueExA(hKey, "Name", nullptr, &type, (LPBYTE)name_buffer, &buffer_size) != ERROR_SUCCESS) {
+    if (RegQueryValueExA(hKey, "Name", nullptr, &type, (LPBYTE)name_buffer,
+                         &buffer_size) != ERROR_SUCCESS) {
         RegCloseKey(hKey);
         spdlog::warn("Failed to query registry value: {}", fullPath);
         return "";
